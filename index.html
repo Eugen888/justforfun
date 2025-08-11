@@ -154,14 +154,18 @@
                         <div class="timeline-dot"></div>
                         <div class="timeline-content">
                             <h4>2024-07-15</h4>
-                            <p>Started Learning Python, we'll see where this is going to go</p>
+                            <p>
+                                Simple Linear Regression(pending)</a>
+                            </p>
                         </div>
                     </div>
                     <div class="timeline-item">
                         <div class="timeline-dot"></div>
                         <div class="timeline-content">
                             <h4>2024-07-15</h4>
-                            <p>To be continued.</p>
+                            <p>
+                                <a href="md-viewer.html?file=test.md" target="_blank">Testing</a>
+                            </p>
                         </div>
                     </div>
                     <!-- Add more timeline-item blocks here -->
@@ -216,6 +220,74 @@
     <script src="assets/js/breakpoints.min.js"></script>
     <script src="assets/js/util.js"></script>
     <script src="assets/js/main.js"></script>
+    <script>
+    (function () {
+    // Single handler for all .md-link clicks (capture beats theme handlers)
+    document.addEventListener('click', (evt) => {
+        const a = evt.target.closest('a.md-link');
+        if (!a) return;
+
+        evt.preventDefault();
+        evt.stopPropagation();
+        if (evt.stopImmediatePropagation) evt.stopImmediatePropagation();
+
+        // Make absolute URL so it's not relative to about:blank
+        const mdAbs = new URL(a.dataset.md, location.href).href;
+        const title = (a.textContent || 'Document').trim();
+
+        const win = window.open('about:blank', '_blank', 'noopener');
+        if (!win) return;
+
+        // A full HTML page that renders itself (dark mode, visible status log)
+        const page = `<!doctype html>
+    <html><head>
+    <meta charset="utf-8" />
+    <title>${title.replace(/</g,'&lt;')}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown.min.css"
+    media="(prefers-color-scheme: light)">
+    <link rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/github-markdown-css/github-markdown-dark.min.css"
+    media="(prefers-color-scheme: dark)">
+    <style>
+    html,body{margin:0;background:#0d1117;color:#e6edf3}
+    body{display:flex;justify-content:center;padding:20px}
+    .markdown-body{max-width:900px;width:100%;padding:24px;box-sizing:border-box}
+    #status{position:fixed;bottom:8px;left:8px;right:8px;font:12px/1.4 system-ui;opacity:.8;white-space:pre-wrap}
+    </style>
+    </head>
+    <body>
+    <article id="app" class="markdown-body"><h2>Loading…</h2></article>
+    <pre id="status">Fetching: ${mdAbs}</pre>
+
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"><\/script>
+    <script>
+        (function(){
+        const log = (m)=>document.getElementById('status').textContent = m;
+        fetch(${JSON.stringify(mdAbs)}, {cache:'no-store'})
+            .then(r => { if(!r.ok) throw new Error('HTTP '+r.status+' '+r.statusText); return r.text(); })
+            .then(md => {
+            log('OK. Length: '+md.length);
+            document.getElementById('app').innerHTML = marked.parse(md);
+            })
+            .catch(e => {
+            log('Failed: '+(e && e.message || e));
+            document.getElementById('app').innerHTML =
+                '<h2>Failed to load Markdown</h2><p>'+String(e)+'</p><p>Tried: ${mdAbs}</p>';
+            });
+        })();
+    <\/script>
+    </body></html>`;
+
+        // Use a Blob URL instead of document.write to ensure the tab fully loads
+        const blob = new Blob([page], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        win.location.href = url;
+    }, true);
+    })();
+    </script>
+
 
 </body>
 </html>
